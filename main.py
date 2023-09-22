@@ -14,7 +14,7 @@ def main():
     channel = scrap.scrap_channel()
     items = scrap.scrap_item(args.limit)
 
-    # git testing comment
+    # git testing comment aaa
     for key, value in channel.items():
         print(f'{key} : {value}.')
 
