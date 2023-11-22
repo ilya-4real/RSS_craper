@@ -1,7 +1,7 @@
 from json import dumps
+from typing import Union
 
 
-def convert(xml_data: dict, json_path: str):
-    json_data = dumps(xml_data)
-    with open(json_path, 'w') as json_file:
-        json_file.write(json_data)
+def convert_xml_to_json(xml_data: Union[list, dict]):
+    json_data = dumps(xml_data, indent=2)
+    return json_data

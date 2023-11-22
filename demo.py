@@ -90,6 +90,7 @@ def main(argv: Optional[Sequence] = None):
     args = parser.parse_args(argv)
     xml = requests.get(source).text
     try:
+        print(type(rss_parser(xml, args.limit, args.json)))
         print("\n".join(rss_parser(xml, args.limit, args.json)))
         return 0
     except Exception as e:

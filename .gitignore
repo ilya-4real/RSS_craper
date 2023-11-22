@@ -1,3 +1,8 @@
 __pycache__/
 rssdata.xml
 data.json
+**.json
+**.xml
+**.txt
+demo.py
+gitlab.py
