@@ -39,6 +39,7 @@ pip install -r requirements.txt
 <h3>Everything is ready to parse)</h3>
 
 <h1>Usage</h1>
+
 You can easily view all available arguments for the parser via: 
 
 ~~~sh
@@ -47,6 +48,7 @@ main.py --help
 
 
 Here is the output of the command above:
+
 ~~~sh
 usage: main.py [-h] [--json] [--limit LIMIT] [--filename FILENAME] source
 
@@ -63,3 +65,33 @@ options:
 ~~~
 
 The result above is clear enough for further use.
+
+<h1>Usage example</h1>
+
+Command:
+
+~~~sh
+main.py "https://news.yahoo.com/rss" --json --limit 2
+~~~
+
+Result in terminal:
+
+~~~sh
+{
+  "title": "Yahoo News - Latest News & Headlines",
+  "link": "https://www.yahoo.com/news",
+  "description": "The latest news and headlines from Yahoo! News. Get breaking news stories and in-depth coverage with videos and photos.",
+  "pubDate": "Wed, 22 Nov 2023 11:49:01 -0500"
+"items": [
+        {
+          "title": "Putin says we must think how to stop 'the tragedy' of war in Ukraine",
+          "pubDate": "2023-11-22T13:58:38Z",
+          "link": "https://news.yahoo.com/putin-must-think-stop-tragedy-135838216.html"
+        },
+        {
+          "title": "Police warn residents after \"extremely venomous\" green mamba escapes",
+          "pubDate": "2023-11-22T12:39:49Z",
+          "link": "https://news.yahoo.com/police-warn-residents-extremely-venomous-123949206.html"
+        }]
+}
+~~~
