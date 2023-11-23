@@ -1,63 +1,65 @@
-from .abstract_writer import AbstractJsonWriter, AbstractTxtWriter, AbstractFormatChooser
-from json import dumps
+from .abstract_writer import AbstractJsonWriter, AbstractTxtWriter
 
-class WRiteFormatChooser(AbstractJsonWriter, AbstractTxtWriter):
-    def __init__(self, json: bool) -> None:
+
+class Cli_writer(AbstractTxtWriter, AbstractJsonWriter):
+    def __init__(self, json: bool = False) -> None:
         self.json = json
 
-    def write(self, data: dict):
-        if self.json:
-            converted_data = self.convert_to_json(data)
-            # print(converted_data)
-            # print()
-            # print(len(converted_data))
-            # print()
-            self.write_json(converted_data)
-        else:
-            self.write_txt(data)
-    
+    def write_txt(self, *data) -> None:
+        for key, value in data[0].items():
+            print(f'{key} : {value}')
+
+        for i in data[1]:
+            for key, value in i.items():
+                if key == 'link':
+                    print()
+                print(f'{key} : {value}')
+            print()
+
     @staticmethod
-    def convert_to_json(scraped_data: dict):
-        return dumps(scraped_data, indent=2)
+    def write_json(*data) -> None:
+        for i in data:
+            print(i)
+
+    def write(self, *data):
+        if self.json:
+            self.write_json(*data)
+        else:
+            self.write_txt(*data)
 
 
-class Cli_writer(WRiteFormatChooser, AbstractJsonWriter, AbstractTxtWriter):
-
-    def write_txt(self, data: dict) -> None:
-        for key, value in data.items():
-            if type(value) == list:
-                for i in value:
-                    self.write_txt(i)
-            else:
-                print(f'{key} : {value}\n')
-
-    def write_json(self, data) -> None:
-            print(data)
-
-
-class File_Writer(WRiteFormatChooser, AbstractJsonWriter, AbstractTxtWriter):
+class File_Writer(AbstractJsonWriter, AbstractTxtWriter):
     def __init__(self, filename: str, json: bool = False) -> None:
-        super().__init__(json)
+        super().__init__()
         if json:
             self.filename = filename + ".json"
         else:
             self.filename = filename + ".txt"
         self.json = json
 
-    #FIXME problem with writing dictionary to the file
-    
-    def write_txt(self, data: dict, write_mod: str = 'w') -> None:
+    def write_txt(self, *data, write_mod: str = 'w') -> None:
         with open(self.filename, write_mod) as file:
-            for key, value in data.items():
-                if type(value) == list:
-                    for i in value:
-                        self.write_txt(i, 'a')
-                else:
-                    file.write(f'{key} : {value}\n')
+            for key, value in data[0].items():
+                file.write(f'{key} : {value}\n')
+            file.write('\n')
 
-    def write_json(self, data):
+            for i in data[1]:
+                for key, value in i.items():
+                    if key == 'link':
+                        file.write("\n")
+                    file.write(f'{key} : {value}\n')
+                file.write("\n")
+
+    def write_json(self, *data):
         with open(self.filename, 'w') as file:
-            file.write(data)
+            for i in data:
+                file.write(i)
+
+    def write(self, *data):
+        if self.json:
+            self.write_json(*data)
+        else:
+            self.write_txt(*data)
 
 
 class Writer:
@@ -68,5 +70,7 @@ class Writer:
             self.filename = filename
             self.writer = File_Writer(filename, json)
 
-    def write(self, data):
-        self.writer.write(data)
+    def write(self, *data):
+        self.writer.write(*data)
+
+

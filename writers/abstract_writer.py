@@ -11,8 +11,3 @@ class AbstractTxtWriter(ABC):
     def write_txt(data, filename):
         raise NotImplementedError
     
-
-class AbstractFormatChooser(ABC):
-    @abstractmethod
-    def write():
-        raise NotImplementedError

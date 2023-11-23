@@ -1,7 +1,0 @@
-title : Yahoo News - Latest News & Headlines
-link : https://www.yahoo.com/news
-description : The latest news and headlines from Yahoo! News. Get breaking news stories and in-depth coverage with videos and photos.
-pubDate : Thu, 23 Nov 2023 13:39:01 -0500
-h his plane's wing has been found guilty of manslaughter
-pubDate : 2023-11-23T15:44:02Z
-link : https://news.yahoo.com/pilot-decapitated-wingsuit-flyer-planes-154402244.html
