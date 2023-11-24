@@ -1,5 +1,8 @@
 from .abstract_writers import AbstractJsonWriter, AbstractTxtWriter, AbstractFormatChooser
 from json import dumps
+from tools.logger import init_logger
+
+logger = init_logger("data writer", 20)
 
 PATH_TO_DATA_FOLDER = "data/"
 
@@ -17,6 +20,7 @@ class FormatChooser(AbstractFormatChooser):
 
     @staticmethod
     def convert_to_json(data):
+        logger.info("converting to JSON")
         return dumps(data, indent=2)
 
 
@@ -43,6 +47,7 @@ class File_Writer(AbstractJsonWriter, AbstractTxtWriter, FormatChooser):
         super().__init__(json)
 
     def write_txt(self, data, write_mod: str = 'w') -> None:
+        logger.info("writing text to the file")
         with open(PATH_TO_DATA_FOLDER + self.filename, write_mod) as file:
             for key, value in data.items():
                 if type(value) == list:
@@ -54,6 +59,7 @@ class File_Writer(AbstractJsonWriter, AbstractTxtWriter, FormatChooser):
 
     def write_json(self, data):
         with open(PATH_TO_DATA_FOLDER + self.filename, 'w') as file:
+                logger.info("writing JSON to the file")
                 file.write(data)
 
 

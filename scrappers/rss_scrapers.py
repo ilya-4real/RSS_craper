@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
 from dataparser import DataParser
 from .absctract_scrapper import AbstractScrapper
+from tools.logger import init_logger
 
-
+logger = init_logger("dataconverter", 20)
 
 RSS_CHANNEL_ITEMS = ("title", "link", "description", "category", "language"
                     "lastBuildDate", "managingEditor", "pubDate")
@@ -17,25 +18,26 @@ class ScrapperInit:
 
 
 class ChannelScraper(AbstractScrapper, ScrapperInit):
-
     def scrap(self):
         """function that scraps data about channel"""
+        logger.info("converting channel data")
         data = {}
         for i in RSS_CHANNEL_ITEMS:
             root = self.tree.find(f"./channel/{i}")
             if root is not None:
                 data[i] = root.text[:120]
         return data
+        
 
 
 class ItemsScrapper(AbstractScrapper, ScrapperInit):
-
     def scrap(self, limit: int = 10) -> list[dict]:
         """
         function that scraps items in the newsfeed
         :param limit: limit of items scraped
         :return: list(dict)
         """
+        logger.info("converting items data")
         res = []
         root = self.tree.findall("./channel/item")
 
@@ -58,6 +60,7 @@ class WholeRSScrapper:
         self.item_scrapper = ItemsScrapper(parser)
 
     def scrap_all_data(self, limit: int = 10) -> dict:
+        logger.info("converting all the data")
         channel_info = self.channel_scrapper.scrap()
         channel_info.update({"items" : self.item_scrapper.scrap(limit)})
         return channel_info

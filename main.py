@@ -3,7 +3,9 @@ from scrappers.rss_scrapers import WholeRSScrapper
 from dataparser import DataParser
 from writers.writers import Writer
 from tools.argumentparser import get_cli_arguments
+from tools.logger import init_logger
 
+logger = init_logger("scrapper", 20) 
 
 def main():
     cli_arguments = get_cli_arguments()
