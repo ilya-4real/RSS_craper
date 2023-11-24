@@ -3,6 +3,6 @@ rssdata.xml
 data.json
 **.json
 **.xml
-
+/data
 demo.py
 gitlab.py
