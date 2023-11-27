@@ -84,7 +84,9 @@ manager.get_data() # this method will return a dictionary containing all scraped
 ~~~
 
 
-<h3>Configuration</h3>
+<h2>Configuration</h2>
+<h3>CLI</h3>
+
 if you are using this package as a cli program you can easily view all available arguments for the parser using this command:
 
 ~~~sh
@@ -95,21 +97,71 @@ main.py --help
 Here is the output of the command above:
 
 ~~~sh
-usage: main.py [-h] [--json] [--limit LIMIT] [--filename FILENAME] source
+usage: main.py [-h] [--json] [--limit LIMIT] [--file] [--items] [--channel] source
 
 Pure Python command-line RSS scrapper.
 
 positional arguments:
-  source               RSS URL
+  source         RSS URL
 
 options:
-  -h, --help           show this help message and exit
-  --json               write result as JSON
-  --limit LIMIT        Limit news topics if this parameter is provided.
-  --filename FILENAME  if provided the script will save result to a file with name in this argument
+  -h, --help     show this help message and exit
+  --json         write result as JSON
+  --limit LIMIT  Limit news topics if this parameter is provided.
+  --file         write result to the file
+  --items        get only news items without channel info
+  --channel      get only channel info without items
 ~~~
 
-The result above is clear enough for further use.
+if **--itmes** and **--channel** options turned on or off simultaneously you will get and channel info and items info.
+
+<h3>Inside other python code</h3>
+
+On the other side, if you are using this package inside another python program you can configure parser providing arguments to the **write_data()** method.
+
+For example:
+
+~~~python
+manager.write_data(file=True, json=True, items=True, limit = 4)
+~~~
+
+and you will get only 4 items written in json format in the file.
+
+Or using **set_scraping_strategy** method:
+~~~python
+manager.set_scraping_strategy(file=False, json=True, channel=True)
+~~~
+and will get only channel info written to command line in json format.
+
+<h3>Also</h3>
+
+you can edit **config.py** file if you want to parse specific XML data. This file contains RSS tags that will be parsed:
+~~~python
+RSS_CHANNEL_TAGS = (
+    "title", 
+    "link", 
+    "description", 
+    "category", 
+    "language", 
+    "lastBuildDate", 
+    "managingEditor", 
+    "pubDate"
+    )
+
+RSS_ITEM_TAGS = (
+    "title", 
+    "author", 
+    "pubDate", 
+    "link", 
+    "category", 
+    "description"
+    )
+~~~
+and path to the folder that will store parsed data:
+
+~~~python 
+PATH_TO_DATA_FOLDER = "data/"
+~~~
 
 <h1>Usage example</h1>
 

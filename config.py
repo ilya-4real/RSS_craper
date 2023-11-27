@@ -1,4 +1,4 @@
-RSS_CHANNEL_ITEMS = (
+RSS_CHANNEL_TAGS = (
     "title", 
     "link", 
     "description", 
@@ -9,7 +9,7 @@ RSS_CHANNEL_ITEMS = (
     "pubDate"
     )
 
-RSS_ITEM_ITEMS = (
+RSS_ITEM_TAGS = (
     "title", 
     "author", 
     "pubDate", 

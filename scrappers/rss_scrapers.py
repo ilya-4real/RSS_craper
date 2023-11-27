@@ -1,6 +1,6 @@
 from ..tools.dataparser import DataParser
 from ..tools.logger import init_logger
-from ..config import RSS_CHANNEL_ITEMS, RSS_ITEM_ITEMS
+from ..config import RSS_CHANNEL_TAGS, RSS_ITEM_TAGS
 from .absctract_scrapper import AbstractScraper
 
 
@@ -11,7 +11,7 @@ class ChannelScraper(AbstractScraper):
     def scrap(self) -> dict[str, str]:
         logger.info("converting channel data")
         data = {}
-        for i in RSS_CHANNEL_ITEMS:
+        for i in RSS_CHANNEL_TAGS:
             root = self.tree.find(f"./channel/{i}")
             if root is not None:
                 data[i] = root.text[:120]
@@ -34,7 +34,7 @@ class ItemsScraper(AbstractScraper):
 
         for i in range(min(self.limit, len(root))):
             dict_of_data = {}
-            for j in RSS_ITEM_ITEMS:
+            for j in RSS_ITEM_TAGS:
                 found = root[i].find(f"./{j}")
                 if found is not None:
                     dict_of_data[j] = found.text[:120]
