@@ -13,11 +13,3 @@ def init_logger(name: str, level: int | Literal["DEBUG", "INFO", "WARNING", "ERR
     handler.setFormatter(logging.Formatter('%(levelname)s - %(name)s - %(message)s'))
     logger.addHandler(handler)
     return logger
-
-
-def logger_decor(func, logger, operation: str):
-    def inner(cls, *args, **kwargs):
-        logger.info(f'operation {operation} started.')
-        func(cls, *args, **kwargs)
-        logger.info(f'operation {operation} ended.')
-    return classmethod(inner)

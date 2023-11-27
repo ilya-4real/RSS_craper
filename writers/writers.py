@@ -1,10 +1,12 @@
+from ..tools.json_converter import convert_to_json
+from ..tools.filename_gen import filename_gen_fun
+from ..tools.logger import init_logger
+from ..config import PATH_TO_DATA_FOLDER
 from .abstract_writers import AbstractJsonWriter, AbstractTxtWriter, AbstractFormatChooser
-from json import dumps
-from tools.logger import init_logger
+
 
 logger = init_logger("data writer", 20)
 
-PATH_TO_DATA_FOLDER = "data/"
 
 class FormatChooser(AbstractFormatChooser):
     
@@ -12,20 +14,15 @@ class FormatChooser(AbstractFormatChooser):
         super().__init__()
         self.json = json
 
-    def write(self, data):
+    def write(self, data) -> None:
         if self.json:
-            self.write_json(self.convert_to_json(data))
+            self.write_json(convert_to_json(data))
         else:
             self.write_txt(data)
 
-    @staticmethod
-    def convert_to_json(data):
-        logger.info("converting to JSON")
-        return dumps(data, indent=2)
 
-
-class Cli_writer(AbstractTxtWriter, AbstractJsonWriter, FormatChooser):
-    def write_txt(self, data: dict) -> None:
+class CliWriter(AbstractTxtWriter, AbstractJsonWriter, FormatChooser):
+    def write_txt(self, data: dict[str, str | list]) -> None:
         for key, value in data.items():
             if type(value) == list:
                 for i in value:
@@ -38,17 +35,16 @@ class Cli_writer(AbstractTxtWriter, AbstractJsonWriter, FormatChooser):
             print(data)
 
 
-class File_Writer(AbstractJsonWriter, AbstractTxtWriter, FormatChooser):
-    def __init__(self, filename: str, json: bool = False) -> None:
-        if json:
-            self.filename = filename + ".json"
-        else:
-            self.filename = filename + ".txt"
+class FileWriter(AbstractJsonWriter, AbstractTxtWriter, FormatChooser):
+    def __init__(self, json: bool = False, write_mod: str = 'w') -> None:
+        self.filename_gen = filename_gen_fun(json)
+        self.filename = next(self.filename_gen)
+        self.write_mod = write_mod
         super().__init__(json)
 
-    def write_txt(self, data, write_mod: str = 'w') -> None:
-        logger.info("writing text to the file")
-        with open(PATH_TO_DATA_FOLDER + self.filename, write_mod) as file:
+    def write_txt(self, data: dict[str, str | list]) -> None:
+        logger.info(f"writing text to {self.filename}")
+        with open(PATH_TO_DATA_FOLDER + self.filename, self.write_mod) as file:
             for key, value in data.items():
                 if type(value) == list:
                     for i in value:
@@ -57,21 +53,7 @@ class File_Writer(AbstractJsonWriter, AbstractTxtWriter, FormatChooser):
                 else:
                     file.write(f'{key} : {value}\n')
 
-    def write_json(self, data):
-        with open(PATH_TO_DATA_FOLDER + self.filename, 'w') as file:
-                logger.info("writing JSON to the file")
+    def write_json(self, data: str):
+        with open(PATH_TO_DATA_FOLDER + self.filename, self.write_mod) as file:
+                logger.info(f"writing JSON to {self.filename}")
                 file.write(data)
-
-
-class Writer:
-    def __init__(self, filename: str = None, json: bool = False) -> None:
-        if not filename:
-            self.writer = Cli_writer(json)
-        else:
-            self.filename = filename
-            self.writer = File_Writer(filename, json)
-
-    def write(self, data):
-        self.writer.write(data)
-
-

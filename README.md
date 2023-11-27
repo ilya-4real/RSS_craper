@@ -17,13 +17,20 @@
 
 <h1 class="">Installation</h1>
 
-1. Clone this repo via: 
+1. create a directory, for example **rss_scraper**:
 
 ~~~sh
+mkdir rss_scraper
+~~~
+
+2. Clone this repo inside the folder you created: 
+
+~~~sh
+cd rss_scraper
 git clone https://github.com/ilya-4real/RSS-scraper.git
 ~~~
 
-2. Activate virtual env:
+3. Activate virtual env:
 
 ~~~sh
 python -m venv venv
@@ -36,11 +43,49 @@ source venv/bin/activate
 pip install -r requirements.txt
 ~~~
 
+4. if you are going to write scraped data to a file, you have to create a directory named **data** next to directory with code:
+
+~~~sh
+mkdir data
+~~~
+
+if you are going to use this package as a cli program you can easily create a **main.py** file containing next code:
+
 <h3>Everything is ready to parse)</h3>
 
 <h1>Usage</h1>
+<h3>First of all</h3>
+you should choose how you will use this package
 
-You can easily view all available arguments for the parser via: 
+1. if you are gonna use it as a cli program you can easely create a **main.py** file next to the folder with code containing this:
+
+~~~python
+from rss_scraper import CliRSScraper
+
+def main():
+    manager = CliRSScraper()
+    manager.write()
+
+if __name__ == "__main__":
+    main()
+~~~
+
+2. Or you can import RSScraper from this package and use as you wish. For example:
+
+~~~python
+from rss_scraper import RSScraper
+
+manager = RSScraper("https://link_to_the_RSS_source.com")
+manager.write_data() # this code will write scraped data to a file
+
+# Or
+
+manager.get_data() # this method will return a dictionary containing all scraped data
+~~~
+
+
+<h3>Configuration</h3>
+if you are using this package as a cli program you can easily view all available arguments for the parser using this command:
 
 ~~~sh
 main.py --help

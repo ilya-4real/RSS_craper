@@ -1,19 +1,14 @@
-from dataparser import DataParser
-from .absctract_scrapper import AbstractScrapper
-from tools.logger import init_logger
-from typing import Union
+from ..tools.dataparser import DataParser
+from ..tools.logger import init_logger
+from ..config import RSS_CHANNEL_ITEMS, RSS_ITEM_ITEMS
+from .absctract_scrapper import AbstractScraper
+
 
 logger = init_logger("dataconverter", 20)
 
-RSS_CHANNEL_ITEMS = ("title", "link", "description", "category", "language"
-                    "lastBuildDate", "managingEditor", "pubDate")
 
-RSS_ITEM_ITEMS = ("title", "author", "pubDate", "link", "category", "description")
-
-
-class ChannelScraper(AbstractScrapper):
-    def scrap(self, limit):
-        """function that scraps data about channel"""
+class ChannelScraper(AbstractScraper):
+    def scrap(self) -> dict[str, str]:
         logger.info("converting channel data")
         data = {}
         for i in RSS_CHANNEL_ITEMS:
@@ -24,21 +19,20 @@ class ChannelScraper(AbstractScrapper):
         
 
 
-class ItemsScrapper(AbstractScrapper):
-    def scrap(self, limit: int = 10) -> list[dict]:
-        """
-        function that scraps items in the newsfeed
-        :param limit: limit of items scraped
-        :return: list(dict)
-        """
+class ItemsScraper(AbstractScraper):
+    def __init__(self, data: DataParser | str, limit: int = 10) -> dict:
+        super().__init__(data)
+        self.limit = limit
+
+    def scrap(self) -> list[dict[str, str]]:
         logger.info("converting items data")
         res = []
         root = self.tree.findall("./channel/item")
 
-        if limit is None:
-            limit = len(root)
+        if self.limit is None:
+            self.limit = len(root)
 
-        for i in range(min(limit, len(root))):
+        for i in range(min(self.limit, len(root))):
             dict_of_data = {}
             for j in RSS_ITEM_ITEMS:
                 found = root[i].find(f"./{j}")
@@ -48,20 +42,16 @@ class ItemsScrapper(AbstractScrapper):
         return res
     
 
-class RSScrapper:
-    def __init__(self, parser: DataParser, scraping_strategy: Union[ChannelScraper, ItemsScrapper]) -> None:
-        self.data = parser.get_data()
-        self.scraping_strategy = scraping_strategy(data=self.data)
+class AllDataScraper:
+    def __init__(self, parser: DataParser, limit: int | None) -> dict:
+        self.parser = parser
+        data = self.parser.get_data()
+        self.channel_scraper = ChannelScraper(data)
+        self.items_scraper = ItemsScraper(data, limit)
 
-    def scrap(self, limit: int = 10) -> dict:
-        if not self.scraping_strategy:
-            self.channel_scrapper = ChannelScraper(data=self.data)
-            self.item_scrapper = ItemsScrapper(data=self.data)
-            logger.info("converting all the data")
-            channel_info = self.channel_scrapper.scrap()
-            channel_info.update({"items" : self.item_scrapper.scrap(limit)})
-            return channel_info
-        elif type(self.scraping_strategy) == ItemsScrapper:
-            return self.scraping_strategy.scrap(limit)
-        else:
-            return self.scraping_strategy.scrap()
+    
+    def scrap(self) -> dict[str, str | list]:
+        channel_data = self.channel_scraper.scrap()
+        items_data = self.items_scraper.scrap()
+        channel_data.update({"items": items_data})
+        return channel_data

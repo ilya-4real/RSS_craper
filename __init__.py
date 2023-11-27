@@ -1,0 +1,1 @@
+from .managers.managers import RSScraper, CliRSScraper
