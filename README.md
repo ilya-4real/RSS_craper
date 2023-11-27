@@ -49,7 +49,6 @@ pip install -r requirements.txt
 mkdir data
 ~~~
 
-if you are going to use this package as a cli program you can easily create a **main.py** file containing next code:
 
 <h3>Everything is ready to parse)</h3>
 
@@ -64,7 +63,7 @@ from rss_scraper import CliRSScraper
 
 def main():
     manager = CliRSScraper()
-    manager.write()
+    manager.write_data()
 
 if __name__ == "__main__":
     main()
