@@ -35,7 +35,6 @@ class CliRSScraper(AbstractManager, StrategyChooser):
         self.parser = DataParser(self.cli_arguments.source)
         self.set_writing_strategy(self.cli_arguments.file, self.cli_arguments.json)
         self.set_scraping_strategy(
-            self.parser,
             self.cli_arguments.channel,
             self.cli_arguments.items,
             self.cli_arguments.limit,
