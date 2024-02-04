@@ -1,3 +1,4 @@
+from typing import Mapping
 from ..tools.argumentparser import get_cli_arguments
 from ..tools.dataparser import DataParser
 from ..scrappers.rss_scrapers import ChannelScraper, ItemsScraper, AllDataScraper
@@ -14,13 +15,10 @@ class StrategyChooser(AbstractStrategyChooser):
             self.writing_strategy = FileWriter(json)
         else:
             self.writing_strategy = CliWriter(json)
-     
+
     def set_scraping_strategy(
-            self, 
-            channel: bool = True, 
-            items: bool = True, 
-            limit: int = 10
-            ) -> None:
+        self, channel: bool = True, items: bool = True, limit: int = 10
+    ) -> None:
         if channel and not items:
             self.scraping_strategy = ChannelScraper(self.parser)
         elif not channel and items:
@@ -38,29 +36,30 @@ class CliRSScraper(AbstractManager, StrategyChooser):
             self.cli_arguments.channel,
             self.cli_arguments.items,
             self.cli_arguments.limit,
-            )
+        )
 
     def write_data(self) -> None:
         data = self.scraping_strategy.scrap()
         self.writing_strategy.write(data)
-    
+
 
 class RSScraper(AbstractManager, StrategyChooser):
     def __init__(self, source: str) -> None:
         self.parser = DataParser(source)
 
     def write_data(
-            self, 
-            file: bool = True, 
-            json: bool = False, 
-            channel: bool = True, 
-            items: bool = True, 
-            limit: int = 10) -> None:
+        self,
+        file: bool = True,
+        json: bool = False,
+        channel: bool = True,
+        items: bool = True,
+        limit: int = 10,
+    ) -> None:
         self.set_writing_strategy(file, json)
         self.set_scraping_strategy(channel, items, limit)
         data = self.scraping_strategy.scrap()
         self.writing_strategy.write(data)
 
-    def get_data(self, channel: bool = True, items: bool = True, limit: int = 10) -> dict:
+    def get_data(self, channel: bool = True, items: bool = True, limit: int = 10):
         self.set_scraping_strategy(channel, items, limit)
-        return self.scraping_strategy.scrap()
+        return self.scraping_strategy.scrap()  # type: ignore

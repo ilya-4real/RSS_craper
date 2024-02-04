@@ -6,8 +6,8 @@ from ..tools.dataparser import DataParser
 
 
 class AbstractScraper(ABC):
-    def __init__(self, data: Union[DataParser, str]) -> dict:
-        if type(data) == DataParser:
+    def __init__(self, data: Union[DataParser, str]) -> None:
+        if isinstance(data, DataParser):
             self.parser = data
             data = self.parser.get_data()
         else:
