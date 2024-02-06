@@ -1,5 +1,5 @@
 import pytest
-from src.scrappers.rss_scrapers import ChannelScraper, ItemsScraper
+from src.scrappers.rss_scrapers import ChannelScraper, ItemsScraper, AllDataScraper
 from src.tools import dataparser
 
 MOCK_DATA = b"""<rss version="2.0">
@@ -46,12 +46,27 @@ expected_item = [
     }
 ]
 
+expected_all_data = {
+    "title": "Yahoo News - Latest News Headlines",
+    "link": "https://www.yahoo.com/news",
+    "description": "\nThe latest news and headlines from Yahoo! News. Get breaking news stories and in-depth coverage with videos and photos.",
+    "pubDate": "Sun, 04 Feb 2024 15:20:07 -0500",
+    "language": "en-US",
+    "items": [
+        {
+            "title": "A woman stole a memory card from a truck. The gruesome footage is now key to an Alaska murder trial",
+            "link": "https://news.yahoo.com/stolen-digital-memory-card-gruesome-050139352.html",
+            "pubDate": "2024-02-04T05:01:39Z",
+        }
+    ],
+}
+
 
 @pytest.fixture
 def mock_dataparser(mocker):
     parser = dataparser.DataParser("https://yahoo.com/news/rss")
     mocker.patch.object(parser, "get_data", return_value=MOCK_DATA)
-    return parser.get_data()
+    return parser
 
 
 def test_scraper_init_with_parser(mock_dataparser):
@@ -72,3 +87,14 @@ def test_channel_scrap(mock_dataparser):
 def test_itme_scrap(mock_dataparser):
     scraper = ItemsScraper(mock_dataparser)
     assert scraper.scrap() == expected_item
+
+
+def test_alldata_scrapper_init(mock_dataparser):
+    scraper = AllDataScraper(mock_dataparser, 1)
+    assert scraper.channel_scraper is not None
+    assert scraper.items_scraper is not None
+
+
+def test_all_data_scrap(mock_dataparser):
+    scraper = AllDataScraper(mock_dataparser, 1)
+    assert scraper.scrap() == expected_all_data

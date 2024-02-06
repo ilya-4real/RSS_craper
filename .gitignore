@@ -7,4 +7,6 @@ data.json
 demo.py
 gitlab.py
 env
+htmlcov
+**__cache
 link.txt
