@@ -65,7 +65,7 @@ class FileWriter(AbstractWriter):
                 else:
                     file.write(f"{key} : {value}\n")
 
-    def write_json(self, data: str):
+    def write_json(self, data: str) -> None:
         with open(self.path / self.filename, self.write_mod) as file:
             logger.info(f"writing JSON to {self.filename}")
             file.write(data)

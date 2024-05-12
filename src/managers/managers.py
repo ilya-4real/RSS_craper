@@ -56,6 +56,7 @@ class AsyncRSSCraper(AbstractScraper):
 
     async def get_data(self):
         data = await self.parser.get_data()
+        # print(data)
         scraper = Scraper(
             self.channel_elements,
             self.item_elements,

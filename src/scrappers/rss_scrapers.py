@@ -24,8 +24,9 @@ class Scraper:
         data = {}
         for i in self.channel_elements:
             root = self.tree.find(f"./channel/{i}")
-            if root and root.text:
-                data[i] = root.text[:120]
+            if root is not None:
+                data[i] = root.text[:120]  # type: ignore
+        print(data)
         return data
 
     def scrap_items_data(self):
@@ -39,8 +40,8 @@ class Scraper:
             dict_of_data = {}
             for j in self.item_elements:
                 found = root[i].find(f"./{j}")
-                if found and found.text:
-                    dict_of_data[j] = found.text[:120]
+                if found is not None:
+                    dict_of_data[j] = found.text[:120]  # type: ignore
             res.append(dict_of_data)
         return res
 
