@@ -1,1 +1,1 @@
-from src.managers.managers import RSScraper, CliRSScraper
+from .src.managers.managers import AsyncRSSCraper

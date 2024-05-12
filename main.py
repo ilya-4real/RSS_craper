@@ -1,10 +1,21 @@
-from src.managers.managers import CliRSScraper
+import asyncio
+
+from src import config
+
+from .src.managers.managers import AsyncRSSCraper
+from 
 
 
-def main():
-    manager = CliRSScraper()
-    manager.write_data()
+async def main():
+    scr = AsyncRSSCraper(
+        "https://finance.yahoo.com/rss/",
+        config.RSS_CHANNEL_TAGS,
+        config.RSS_ITEM_TAGS,
+    )
+    task = asyncio.create_task(scr.get_data())
+    data = await task
+    print(data)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

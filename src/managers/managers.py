@@ -1,65 +1,80 @@
-from typing import Mapping
-from ..tools.argumentparser import get_cli_arguments
-from ..tools.dataparser import DataParser
-from ..scrappers.rss_scrapers import ChannelScraper, ItemsScraper, AllDataScraper
-from ..writers.writers import CliWriter, FileWriter
-from .abstract_manager import AbstractManager, AbstractStrategyChooser
+from abc import ABC
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable
+
+from ..scrappers.rss_scrapers import (
+    Scraper,
+)
+from ..tools.dataparser import AsyncDataParser, DataParser
+from ..writers.writers import FileWriter, StdoutWRiter
 
 
-class StrategyChooser(AbstractStrategyChooser):
-    def __init__(self, url: str) -> None:
-        self.parser = DataParser(url)
-
-    def set_writing_strategy(self, file: bool, json: bool) -> None:
-        if file:
-            self.writing_strategy = FileWriter(json)
-        else:
-            self.writing_strategy = CliWriter(json)
-
-    def set_scraping_strategy(
-        self, channel: bool = True, items: bool = True, limit: int = 10
-    ) -> None:
-        if channel and not items:
-            self.scraping_strategy = ChannelScraper(self.parser)
-        elif not channel and items:
-            self.scraping_strategy = ItemsScraper(self.parser, limit)
-        else:
-            self.scraping_strategy = AllDataScraper(self.parser, limit)
+@dataclass
+class AbstractScraper(ABC):
+    url: str
+    channel_elements: Iterable[str]
+    item_elements: Iterable[str]
+    channel: bool = True
+    items: bool = True
+    items_limit: int = 10
 
 
-class CliRSScraper(AbstractManager, StrategyChooser):
-    def __init__(self) -> None:
-        self.cli_arguments = get_cli_arguments()
-        self.parser = DataParser(self.cli_arguments.source)
-        self.set_writing_strategy(self.cli_arguments.file, self.cli_arguments.json)
-        self.set_scraping_strategy(
-            self.cli_arguments.channel,
-            self.cli_arguments.items,
-            self.cli_arguments.limit,
+@dataclass
+class RSSCraper(AbstractScraper):
+    def __post_init__(self):
+        self.parser = DataParser(self.url)
+        self.data = self.parser.get_data()
+        self.scraper = Scraper(
+            self.channel_elements,
+            self.item_elements,
+            self.data,
+            self.items_limit,
         )
 
-    def write_data(self) -> None:
-        data = self.scraping_strategy.scrap()
-        self.writing_strategy.write(data)
+    def get_data(self):
+        if self.channel and self.items:
+            return self.scraper.scrap_all_data()
+        elif self.channel:
+            return self.scraper.scrap_channel_data()
+        elif self.items:
+            return self.scraper.scrap_items_data()
+
+    def write_data(self, json: bool, path_to_dir: Path | None = None) -> None:
+        data = self.get_data()
+        match path_to_dir:
+            case None:
+                StdoutWRiter(json).write(data)
+            case _:
+                FileWriter(json).write(data)
 
 
-class RSScraper(AbstractManager, StrategyChooser):
-    def __init__(self, source: str) -> None:
-        self.parser = DataParser(source)
+@dataclass
+class AsyncRSSCraper(AbstractScraper):
+    def __post_init__(self):
+        self.parser = AsyncDataParser(self.url)
 
-    def write_data(
-        self,
-        file: bool = True,
-        json: bool = False,
-        channel: bool = True,
-        items: bool = True,
-        limit: int = 10,
+    async def get_data(self):
+        data = await self.parser.get_data()
+        scraper = Scraper(
+            self.channel_elements,
+            self.item_elements,
+            data,
+            self.items_limit,
+        )
+        if self.channel and self.items:
+            return scraper.scrap_all_data()
+        elif self.channel:
+            return scraper.scrap_channel_data()
+        elif self.items:
+            return scraper.scrap_items_data()
+
+    async def write_data(
+        self, json: bool, path_to_dir: Path | None = None
     ) -> None:
-        self.set_writing_strategy(file, json)
-        self.set_scraping_strategy(channel, items, limit)
-        data = self.scraping_strategy.scrap()
-        self.writing_strategy.write(data)
-
-    def get_data(self, channel: bool = True, items: bool = True, limit: int = 10):
-        self.set_scraping_strategy(channel, items, limit)
-        return self.scraping_strategy.scrap()  # type: ignore
+        data = await self.get_data()
+        match path_to_dir:
+            case None:
+                StdoutWRiter(json).write(data)
+            case _:
+                FileWriter(json).write(data)

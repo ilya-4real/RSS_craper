@@ -1,32 +1,34 @@
-from typing import Mapping
+import xml.etree.ElementTree as ET
+from abc import abstractmethod
+from dataclasses import dataclass, field
+from typing import Iterable
 
-from ..tools.dataparser import DataParser
 from ..tools.logger import init_logger
-from ..config import RSS_CHANNEL_TAGS, RSS_ITEM_TAGS
-from .absctract_scrapper import AbstractScraper
-
 
 logger = init_logger("dataconverter", 20)
 
 
-class ChannelScraper(AbstractScraper):
-    def scrap(self) -> dict[str, str]:
-        logger.info("converting channel data")
+@dataclass(eq=False)
+class Scraper:
+    channel_elements: Iterable[str]
+    item_elements: Iterable[str]
+    data: str
+    limit: int = 10
+    tree: ET.Element = field(init=False)
+
+    @abstractmethod
+    def __post_init__(self) -> None:
+        self.tree = ET.fromstring(self.data)
+
+    def scrap_channel_data(self):
         data = {}
-        for i in RSS_CHANNEL_TAGS:
+        for i in self.channel_elements:
             root = self.tree.find(f"./channel/{i}")
-            if root is not None:
-                data[i] = root.text[:120]  # type: ignore
+            if root and root.text:
+                data[i] = root.text[:120]
         return data
 
-
-class ItemsScraper(AbstractScraper):
-    def __init__(self, data: DataParser | str, limit: int | None = 10) -> None:
-        super().__init__(data)
-        self.limit = limit
-
-    def scrap(self) -> list[dict[str, str]]:
-        logger.info("converting items data")
+    def scrap_items_data(self):
         res = []
         root = self.tree.findall("./channel/item")
 
@@ -35,23 +37,15 @@ class ItemsScraper(AbstractScraper):
 
         for i in range(min(self.limit, len(root))):
             dict_of_data = {}
-            for j in RSS_ITEM_TAGS:
+            for j in self.item_elements:
                 found = root[i].find(f"./{j}")
-                if found is not None:
-                    dict_of_data[j] = found.text[:120]  # type: ignore
+                if found and found.text:
+                    dict_of_data[j] = found.text[:120]
             res.append(dict_of_data)
         return res
 
-
-class AllDataScraper:
-    def __init__(self, parser: DataParser, limit: int | None) -> None:
-        self.parser = parser
-        data = self.parser.get_data()
-        self.channel_scraper = ChannelScraper(data)
-        self.items_scraper = ItemsScraper(data, limit)
-
-    def scrap(self) -> Mapping[str, str | list[dict[str, str]]]:
-        channel_data = self.channel_scraper.scrap()
-        items_data = self.items_scraper.scrap()
-        channel_data.update({"items": items_data})  # type: ignore
+    def scrap_all_data(self):
+        channel_data = self.scrap_channel_data()
+        items_data = self.scrap_items_data()
+        channel_data["items"] = items_data
         return channel_data
